@@ -119,8 +119,17 @@ params: none
 description: this function randomly generates weather conditions for the day from a predefined list of weather conditions.
 It returns a string representing the weather condition.
 */
-function generateWeather(): weatherConditions {
-
+unction generateWeather(): weatherConditions {
+  const weatherOptions: weatherConditions[] = [
+    "Sunny",
+    "Cloudy",
+    "Rainy",
+    "Windy",
+    "Hot",
+    "Cold",
+  ];
+  const randomIndex = Math.floor(Math.random() * weatherOptions.length);
+  return weatherOptions[randomIndex];
 }
 
 
@@ -139,6 +148,8 @@ function calculateCustomers(weather: weatherConditions, day: daysOfWeek): number
 
 
 //Daily Report 
+function fmtMoney(n: number) { return `$${n.toFixed(2)}`; }
+
 type DailyReport = {
   dayNumber: number;
   dayName: daysOfWeek;
@@ -149,7 +160,7 @@ type DailyReport = {
   cash: number;             // end-of-day cash
 };
 
-function printDailyReport(info: DayReport) {
+function printDailyReport(info: DailyReport) {
   const inv = info.inventory;
   console.log("\n===== End of Day Report =====");
   console.log(`Day ${info.dayNumber} — ${info.dayName} — Weather: ${info.weather}`);
