@@ -132,16 +132,23 @@ function generateWeather(): weatherConditions {
   return weatherOptions[randomIndex];
 }
 
+const DAYS: daysOfWeek[] = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+let dayCounter = 0;
 
 function generateDay(): daysOfWeek {
+  const day = DAYS[dayCounter % DAYS.length];
+  dayCounter++;
+  return day;
 }
+
 
 /*
 function name: calculateCustomers
 params: weather (weatherConditions), day (daysOfWeek)
-description: This function calculates the number of potential customers based on the weather conditions and the day of the week. 
-It uses predefined multipliers for each weather condition and day to determine the final customer count.    
+description: This function calculates the number of potential customers based on the weather conditions and the day of the week.
+It uses predefined multipliers for each weather condition and day to determine the final customer count.
 */
+
 function calculateCustomers(weather: weatherConditions, day: daysOfWeek): number {
   const base = baseCustomersWeather[weather];
   const multiplier = DAY_MULTIPLIER[day];
@@ -179,37 +186,131 @@ function printDailyReport(info: DailyReport) {
 }
 
 
-//Main Function
+// Main Function (interactive)
 async function main() {
-    //Welcome Message to Gamer 
-    console.log('Welcome to the Lemonade Stand Game!');
-    console.log('');
-    console.log('In this small town known as sunny San Diego,you are in charge of running your own lemonade stand');
-    console.log('With businesses, you have lots of responsibility!');
-    console.log('You will need to buy supplies, set your prices, and manage your money wisely to make a profit.');
-    console.log('If you make the most money, you are the winner!');
-    console.log('');
+  // Welcome Message to Gamer 
+  console.log('Welcome to the Lemonade Stand Game!');
+  console.log('');
+  console.log('In this small town known as sunny San Diego, you are in charge of running your own lemonade stand');
+  console.log('With businesses, you have lots of responsibility!');
+  console.log('You will need to buy supplies, set your prices, and manage your money wisely to make a profit.');
+  console.log('If you make the most money, you are the winner!');
+  console.log('');
 
-    //Starting the Game, read user input
-    const rl = createInterface({ input, output });
-    const answer = await rl.question('Are you starting a new game? Yes or No.\n');
+  const rl = createInterface({ input, output });
 
+  // helpers for prompts
+  async function askNumber(prompt: string, def?: number): Promise<number> {
+    while (true) {
+      const raw = await rl.question(def !== undefined ? `${prompt} [${def}]: ` : `${prompt}: `);
+      const s = raw.trim() === "" && def !== undefined ? String(def) : raw;
+      const n = Number(s);
+      if (Number.isFinite(n) && n >= 0) return n;
+      console.log("Please enter a non-negative number.");
+    }
+  }
+  async function askYesNo(prompt: string, def: "y" | "n" = "y"): Promise<boolean> {
+    const raw = (await rl.question(`${prompt} [${def.toUpperCase()}]: `)).trim().toLowerCase();
+    if (raw === "") return def === "y";
+    return raw.startsWith("y");
+  }
 
-    if(answer.toLowerCase() === 'yes') {
-        console.log('Great! The game is starting...');
-        // Call function to start a new game
-    } 
-    else if(answer.toLowerCase() === 'no') {
-        console.log('Okay, maybe next time!');
-        // Exit or return to main menu
-    } 
-    else {
-        console.log('Invalid input. Please type "Yes" or "No".');
-        // Optionally, you can loop back to ask the question again
+  const answer = (await rl.question('Are you starting a new game? Yes or No.\n')).trim().toLowerCase();
+
+  if (answer === 'yes') {
+    console.log('Great! The game is starting...\n');
+
+    let dayNumber = 1;
+    let keepPlaying = true;
+
+    while (keepPlaying) {
+      const dayName = generateDay();           // your function
+      const weather = generateWeather();       // your function
+
+      console.log(`\n--- Day ${dayNumber} (${dayName}) — Weather: ${weather} ---`);
+      console.log(`Cash: ${fmtMoney(assets.money)}`);
+      console.log(`Inventory: cups=${inventory.cups}, lemons=${inventory.lemons}, sugar=${inventory.sugar}, ice=${inventory.iceCubes}, ads=${inventory.advertising}`);
+      console.log(`Prices: cups ${fmtMoney(prices.cups)}, lemons ${fmtMoney(prices.lemons)}, sugar ${fmtMoney(prices.sugar)}, iceCube ${fmtMoney(prices.iceCubes)}, advertising ${fmtMoney(prices.advertising)}`);
+
+      // Morning: let the player buy supplies (validates they can afford it)
+      if (await askYesNo("Do you want to buy supplies today?", "y")) {
+        while (true) {
+          const qCups  = await askNumber("How many cups to buy?", 20);
+          const qLem   = await askNumber("How many lemons to buy?", 10);
+          const qSug   = await askNumber("How many sugar units to buy?", 20);
+          const qIce   = await askNumber("How many ice cubes to buy?", 100);
+          const qAds   = await askNumber("How many advertising units to buy?", 0);
+
+          // pre-check total cost before purchasing
+          const totalCost =
+            qCups * prices.cups +
+            qLem  * prices.lemons +
+            qSug  * prices.sugar +
+            qIce  * prices.iceCubes +
+            qAds  * prices.advertising;
+
+          if (totalCost > assets.money) {
+            console.log(`You can't afford that (need ${fmtMoney(totalCost)}, have ${fmtMoney(assets.money)}). Try smaller amounts.`);
+            continue; // re-prompt
+          }
+
+          // apply purchases via your purchase() helper
+          if (qCups) purchase("cups", qCups);
+          if (qLem)  purchase("lemons", qLem);
+          if (qSug)  purchase("sugar", qSug);
+          if (qIce)  purchase("iceCubes", qIce);
+          if (qAds)  purchase("advertising", qAds);
+
+          console.log(`Purchased supplies for ${fmtMoney(totalCost)}. Cash now ${fmtMoney(assets.money)}.`);
+          break;
+        }
+      }
+
+      // Let the player set a price per cup for the day
+      const pricePerCup = await askNumber("Set your price per cup ($)", 1.0);
+
+      // Estimate demand for the day
+      const potentialCustomers = calculateCustomers(weather, dayName); // your function
+
+      // Sales: make pitchers on demand and sell up to potentialCustomers
+      let sold = 0;
+      for (let i = 0; i < potentialCustomers; i++) {
+        if (inventory.cupsOfLemonade <= 0) {
+          const made = makeLemonadePitcher(); // your function
+          if (!made) break;                   // out of ingredients
+        }
+        // sell one cup
+        inventory.cupsOfLemonade -= 1;
+        assets.money += pricePerCup;
+        sold++;
+      }
+
+      // End-of-day realism: ice melts
+      inventory.iceCubes = 0;
+
+      // End-of-day report
+      printDailyReport({
+        dayNumber,
+        dayName,
+        weather,
+        sold,
+        potentialCustomers,
+        inventory: { ...inventory }, // snapshot after sales
+        cash: assets.money,
+      });
+
+      dayNumber++;
+      keepPlaying = await askYesNo("Play another day?", "y");
     }
 
-    rl.close();
+    console.log("🏁 Simulation complete. Thanks for playing!");
+  } else if (answer === 'no') {
+    console.log('Okay, maybe next time!');
+  } else {
+    console.log('Invalid input. Please type "Yes" or "No".');
+  }
 
+  await rl.close();
 }
 
 main();
