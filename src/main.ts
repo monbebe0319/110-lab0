@@ -95,18 +95,23 @@ It checks if there are enough ingredients to make the specified quantity of lemo
 The function refers to the Recipe object to determine how many ingredients are needed per pitcher and per cup.
 */
 
-function makeLemonadePitcher(item: keyof typeof inventory): boolean {
-    if(inventory.lemons >= Recipe.lemonsPerPitcher && inventory.sugar >= Recipe.sugarPerPitcher && inventory.iceCubes >= Recipe.iceCubesPerPitcher && inventory.cups >= Recipe.cupsPerPitcher) {
-        inventory.lemons -= Recipe.lemonsPerPitcher;
-        inventory.sugar -= Recipe.sugarPerPitcher;
-        inventory.iceCubes -= Recipe.iceCubesPerPitcher;
-        inventory.cups -= Recipe.cupsPerPitcher;
-        inventory.cupsOfLemonade += Recipe.cupsPerPitcher;
-        return true;
-    }
-
-    return false;
+function makeLemonadePitcher(): boolean {
+  if (
+    inventory.lemons >= Recipe.lemonsPerPitcher &&
+    inventory.sugar >= Recipe.sugarPerPitcher &&
+    inventory.iceCubes >= Recipe.iceCubesPerPitcher &&
+    inventory.cups >= Recipe.cupsPerPitcher
+  ) {
+    inventory.lemons -= Recipe.lemonsPerPitcher;
+    inventory.sugar -= Recipe.sugarPerPitcher;
+    inventory.iceCubes -= Recipe.iceCubesPerPitcher;
+    inventory.cups -= Recipe.cupsPerPitcher;
+    inventory.cupsOfLemonade += Recipe.cupsPerPitcher;
+    return true;
+  }
+  return false;
 }
+
 
 /*
 function name: generateWeather
@@ -130,6 +135,34 @@ It uses predefined multipliers for each weather condition and day to determine t
 */
 function calculateCustomers(weather: weatherConditions, day: daysOfWeek): number {
 
+}
+
+
+//Daily Report 
+type DailyReport = {
+  dayNumber: number;
+  dayName: daysOfWeek;
+  weather: weatherConditions;
+  sold: number;
+  potentialCustomers: number;
+  inventory: Inventory;     // snapshot after sales
+  cash: number;             // end-of-day cash
+};
+
+function printDailyReport(info: DayReport) {
+  const inv = info.inventory;
+  console.log("\n===== End of Day Report =====");
+  console.log(`Day ${info.dayNumber} — ${info.dayName} — Weather: ${info.weather}`);
+  console.log(`Customers (potential): ${info.potentialCustomers}`);
+  console.log(`Cups of lemonade sold: ${info.sold}`);
+  console.log("Inventory remaining:");
+  console.log(`  cups:       ${inv.cups}`);
+  console.log(`  lemons:     ${inv.lemons}`);
+  console.log(`  sugar:      ${inv.sugar}`);
+  console.log(`  ice cubes:  ${inv.iceCubes}`);
+  console.log(`  advertising:${inv.advertising}`);
+  console.log(`Cash balance: ${fmtMoney(info.cash)}`);
+  console.log("=============================\n");
 }
 
 
