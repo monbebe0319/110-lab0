@@ -96,7 +96,7 @@ The function refers to the Recipe object to determine how many ingredients are n
 */
 
 function makeLemonadePitcher(item: keyof typeof inventory): boolean {
-    if(inventory.lemons > = Recipe.lemonsPerPitcher && inventory.sugar >= Recipe.sugarPerPitcher && inventory.iceCubes >= Recipe.iceCubesPerPitcher && inventory.cups >= Recipe.cupsPerPitcher) {
+    if(inventory.lemons >= Recipe.lemonsPerPitcher && inventory.sugar >= Recipe.sugarPerPitcher && inventory.iceCubes >= Recipe.iceCubesPerPitcher && inventory.cups >= Recipe.cupsPerPitcher) {
         inventory.lemons -= Recipe.lemonsPerPitcher;
         inventory.sugar -= Recipe.sugarPerPitcher;
         inventory.iceCubes -= Recipe.iceCubesPerPitcher;
@@ -106,6 +106,20 @@ function makeLemonadePitcher(item: keyof typeof inventory): boolean {
     }
 
     return false;
+}
+
+/*
+function name: generateWeather
+params: none
+description: this function randomly generates weather conditions for the day from a predefined list of weather conditions.
+It returns a string representing the weather condition.
+*/
+function generateWeather(): weatherConditions {
+
+}
+
+
+function generateDay(): daysOfWeek {
 }
 
 /*
