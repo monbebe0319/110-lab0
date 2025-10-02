@@ -119,7 +119,7 @@ params: none
 description: this function randomly generates weather conditions for the day from a predefined list of weather conditions.
 It returns a string representing the weather condition.
 */
-unction generateWeather(): weatherConditions {
+function generateWeather(): weatherConditions {
   const weatherOptions: weatherConditions[] = [
     "Sunny",
     "Cloudy",
@@ -143,7 +143,9 @@ description: This function calculates the number of potential customers based on
 It uses predefined multipliers for each weather condition and day to determine the final customer count.    
 */
 function calculateCustomers(weather: weatherConditions, day: daysOfWeek): number {
-
+  const base = baseCustomersWeather[weather];
+  const multiplier = DAY_MULTIPLIER[day];
+  return Math.floor(base * multiplier);
 }
 
 
