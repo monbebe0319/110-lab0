@@ -3,12 +3,20 @@ import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 
 //Variables
-interface inventory = {
-    lemons: 0;
-    sugar: 0;
-    iceCubes: 0;
-    cups: 0;
-    advertising: 0;
+interface Inventory {
+    lemons: number;
+    sugar: number;
+    iceCubes: number;
+    cups: number;
+    advertising: number;
+}
+
+const inventory: Inventory = {
+    lemons: 0,
+    sugar: 0,
+    iceCubes: 0,
+    cups: 0,
+    advertising: 0
 };
 
 const prices = {
@@ -19,8 +27,12 @@ const prices = {
     advertising: 1.50
 }
 
-interface assests = {
-    money : 20.00;
+interface Assets {
+    money: number;
+}
+
+const assets: Assets = {
+    money: 20.00
 };
 
 const weatherConditions = ['Sunny', 'Cloudy', 'Rainy', 'Windy', 'Hot', 'Cold'];
@@ -29,11 +41,20 @@ const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Sat
 
 /*
 function name: purchase 
-params: item (key of inventory), quantity (number), money (number)
+params: item (key of inventory), quantity (number)
 description: This function allows the player to purchase items for their lemonade stand. It checks if the player has enough money to make the purchase and updates the inventory and money accordingly.
 */
-function purchase(item: keyof typeof inventory, quantity: number, money: number): boolean {
+function purchase(item: keyof typeof inventory, quantity: number): boolean {
+    const cost = prices[item] * quantity;
+    if (assets.money >= cost) {
+        inventory[item] += quantity;
+        assets.money -= cost;
+        return true;
+    }
+    return false;
 }
+
+
 //Main Function
 async function main() {
     //Welcome Message to Gamer 
