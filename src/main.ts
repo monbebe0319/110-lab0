@@ -9,6 +9,7 @@ interface Inventory {
     iceCubes: number;
     cups: number;
     advertising: number;
+    cupsOfLemonade: number;
 }
 
 const inventory: Inventory = {
@@ -16,12 +17,13 @@ const inventory: Inventory = {
     sugar: 0,
     iceCubes: 0,
     cups: 0,
-    advertising: 0
+    advertising: 0,
+    cupsOfLemonade: 0
 };
 
 const prices = {
     lemons: 0.30,
-    sugar: 0.25,
+    sugar: 0.10,
     iceCubes: 0.01,
     cups: 0.10,
     advertising: 1.50
@@ -32,19 +34,50 @@ interface Assets {
 }
 
 const assets: Assets = {
-    money: 20.00
+    money: 50.00
 };
 
-const weatherConditions = ['Sunny', 'Cloudy', 'Rainy', 'Windy', 'Hot', 'Cold'];
-const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+//Lemonde Recipe 
+const Recipe = {
+    lemonsPerPitcher: 4,
+    sugarPerPitcher: 4, 
+    iceCubesPerPitcher: 10,
+    cupsPerPitcher: 10
+};
+
+type weatherConditions = 'Sunny' | 'Cloudy' | 'Rainy' | 'Windy' | 'Hot' | 'Cold';
+type daysOfWeek = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
+
+
+//Number of customers per day
+const baseCustomersWeather: Record<weatherConditions, number> = {
+    'Sunny': 15,
+    'Cloudy': 10,
+    'Rainy': 5,
+    'Windy': 8,
+    'Hot': 25,
+    'Cold': 2
+}
+
+const DAY_MULTIPLIER: Record<daysOfWeek, number> = {
+  Monday: 0.9,
+  Tuesday: 0.95,
+  Wednesday: 1.0,
+  Thursday: 1.05,
+  Friday: 1.2,
+  Saturday: 1.35,
+  Sunday: 1.25,
+};
+
+
 
 
 /*
 function name: purchase 
-params: item (key of inventory), quantity (number)
+params: item (key of prices), quantity (number)
 description: This function allows the player to purchase items for their lemonade stand. It checks if the player has enough money to make the purchase and updates the inventory and money accordingly.
 */
-function purchase(item: keyof typeof inventory, quantity: number): boolean {
+function purchase(item: keyof typeof prices, quantity: number): boolean {
     const cost = prices[item] * quantity;
     if (assets.money >= cost) {
         inventory[item] += quantity;
@@ -52,6 +85,37 @@ function purchase(item: keyof typeof inventory, quantity: number): boolean {
         return true;
     }
     return false;
+}
+
+/*
+function name: makeLemonade
+params: item (key of inventory), quantity (number)
+description: This function allows the player to make lemonade by using the ingredients in their inventory. 
+It checks if there are enough ingredients to make the specified quantity of lemonade and updates the inventory accordingly.
+The function refers to the Recipe object to determine how many ingredients are needed per pitcher and per cup.
+*/
+
+function makeLemonadePitcher(item: keyof typeof inventory): boolean {
+    if(inventory.lemons > = Recipe.lemonsPerPitcher && inventory.sugar >= Recipe.sugarPerPitcher && inventory.iceCubes >= Recipe.iceCubesPerPitcher && inventory.cups >= Recipe.cupsPerPitcher) {
+        inventory.lemons -= Recipe.lemonsPerPitcher;
+        inventory.sugar -= Recipe.sugarPerPitcher;
+        inventory.iceCubes -= Recipe.iceCubesPerPitcher;
+        inventory.cups -= Recipe.cupsPerPitcher;
+        inventory.cupsOfLemonade += Recipe.cupsPerPitcher;
+        return true;
+    }
+
+    return false;
+}
+
+/*
+function name: calculateCustomers
+params: weather (weatherConditions), day (daysOfWeek)
+description: This function calculates the number of potential customers based on the weather conditions and the day of the week. 
+It uses predefined multipliers for each weather condition and day to determine the final customer count.    
+*/
+function calculateCustomers(weather: weatherConditions, day: daysOfWeek): number {
+
 }
 
 
